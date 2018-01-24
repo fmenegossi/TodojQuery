@@ -76,52 +76,101 @@
   </style>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>TodoList</h1>
+  <body>
+    <div class="container">
+      <h1>TodoList</h1>
 
-    <form>
-      <input type="text" id="new-todo" placeholder="What needs to be done?">
-    </form>
+      <form>
+        <input type="text" id="new-todo" placeholder="What needs to be done?">
+      </form>
 
-    <ul id="todolist">
-      <li class="todo">
-        <input id="todo-1" type="checkbox">
-        <label for="todo-1">Sweep the floor</label>
-      </li>
-      <li class="todo completed">
-        <input id="todo-2" type="checkbox" checked="checked">
-        <label for="todo-2">Dust the vases</label>
-      </li>
-    </ul>
-    <div class="footer">
-      Todo: <span id="todo-count">1</span> •
-      Done: <span id="completed-count">0</span> •
-      Total: <span id="total-count">1</span>
+      <ul id="todolist">
+        <li class="todo">
+          <input id="todo-1" type="checkbox">
+          <label for="todo-1">Sweep the floor</label>
+        </li>
+        <li class="todo completed">
+          <input id="todo-2" type="checkbox" checked="checked">
+          <label for="todo-2">Dust the vases</label>
+        </li>
+      </ul>
+      <div class="footer">
+        Todo: <span id="todo-count">1</span> •
+        Done: <span id="completed-count">0</span> •
+        Total: <span id="total-count">1</span> •
+        <a href="#" id="clean-up">Clean up</a>
+      </div>
     </div>
-  </div>
 
-  <script>
-    function updateCounters() {
-      var todoCount = $(".todo").length;
-      var completedCount = $(".completed").length;
+    <script>
+      function updateCounters() {
+        var todoCount = $(".todo").length;
+        var completedCount = $(".completed").length;
 
-      $("#total-count").html(todoCount);
-      $("#completed-count").html(completedCount);
-      $("#todo-count").html(todoCount - completedCount);
-    }
+        $("#total-count").html(todoCount);
+        $("#completed-count").html(completedCount);
+        $("#todo-count").html(todoCount - completedCount);
+      }
 
-    function toggleDone() {
-      var checkbox = this;
-      $(checkbox).parent().toggleClass("completed");
-      updateCounters();
-    }
+      function toggleDone() {
+        var checkbox = this;
+        $(checkbox).parent().toggleClass("completed");
+        updateCounters();
+      }
 
-    $(document).ready(function() {
-      $("input[type=checkbox]").bind('change', toggleDone);
-      updateCounters();
-    });
-  </script>
-  
-</body>
+      function submitTodo(event) {
+        // stop the form from doing the default action, submitting...
+        event.preventDefault();
+
+        var title = $("#new-todo").val();
+
+        createTodo(title);
+
+        $("#new-todo").val(null);
+        updateCounters();
+      }
+
+      function createTodo(title) {
+        var checkboxId = "todo-" + nextTodoId();
+
+        var listItem = $("<li></li>");
+        listItem.addClass("todo");
+
+        var checkbox = $(`<input type="checkbox" id="${checkboxId}">`);
+        checkbox.val(1);
+        checkbox.bind('change', toggleDone);
+
+        var space = document.createTextNode(" ");
+
+        var label = $(`<label for="${checkboxId}"></label>`);
+        label.html(title);
+
+        listItem.append(checkbox);
+        listItem.append(space);
+        listItem.append(label);
+
+        $("#todolist").append( listItem );
+
+        updateCounters();
+      }
+
+      function nextTodoId() {
+        return $(".todo").length + 1;
+      }
+
+      function cleanUpDoneTodos(event) {
+        event.preventDefault();
+        $.when($(".completed").remove())
+        .then(updateCounters);
+      }
+
+      $(document).ready(function() {
+        $("input[type=checkbox]").bind('change', toggleDone);
+        $("form").bind('submit', submitTodo);
+        $("#clean-up").bind('click', cleanUpDoneTodos);
+        updateCounters();
+      });
+    </script>
+
+  </body>
 </html>
